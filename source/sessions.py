@@ -1,7 +1,7 @@
 import pandas as pd
 
 def check_regular_session(time: pd.TimeStamp):
-    #checks if regular session or not
+    #checks if regular session or not: time is 14:39 to 21:00 Universal Coordinated Time
     time = pd.TimeStamp(time)
     hour = time.hour
     minute = time.minute
@@ -15,12 +15,12 @@ def check_regular_session(time: pd.TimeStamp):
 #ERT is the earings release time, ticker is symbol and bar which is a df with timestamp_utc, open, high, low, close, volume etc.
 #func gets price of stock closing during normal hours before earnings are announced
 def last_regular_close(bars, ticker, ERT):
-    bars = bars[(bars["ticker"]== ticker) & (bars["timestamp_utc" < ERT])]
+    bars = bars[(bars["ticker"]== ticker) & (bars["timestamp_utc"] < ERT)]
 
-    bars = bars[bars["timestamp_utc"].apply(is_regular_session)] #keeps bars from normal market hours ONLY 
+    bars = bars[bars["timestamp_utc"].apply(check_regular_session)] #keeps bars from normal market hours ONLY 
 
 
     if len(bars) == 0:
         return None
     
-    return float(bars["close"].tail(1).values[0]) #recent closing price before earnings
+    return float(bars["close"].iloc[-1]) #recent closing price before earnings -using iloc instead of .tail().values to get last row
