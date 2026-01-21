@@ -1,0 +1,31 @@
+from pathlib import Path
+from source.features import create_features
+from source.metrics import produce_results
+from source.io import load_universe, load_bars, load_earnings
+from source.backtest import backtest
+from source.signals import create_signals
+
+print(" main.py started running")
+
+dir = Path("data")
+
+def main():
+    universe = load_universe(dir / "All Sessions Shares.xlsx")
+    earnings = load_earnings(dir / "earnings.csv")
+    bars = load_bars(dir/ "bars.csv")
+
+    features = create_features(earnings, bars, universe)
+    print(features)
+    signals = create_signals(features)
+    print(signals)
+    actual_backtest = backtest(signals, bars)
+    print(actual_backtest)
+    statistics = produce_results(actual_backtest)
+    print("Summary of metrics:")
+    for i, j in statistics.items():
+        print("{}: {}".format(i,j)) #printing out dict
+
+
+    
+if __name__ == "__main__":
+    main()

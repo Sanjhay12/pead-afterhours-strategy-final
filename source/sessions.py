@@ -1,8 +1,8 @@
 import pandas as pd
 
-def check_regular_session(time: pd.TimeStamp):
+def check_regular_session(time: pd.Timestamp):
     #checks if regular session or not: time is 14:39 to 21:00 Universal Coordinated Time
-    time = pd.TimeStamp(time)
+    time = pd.Timestamp(time)
     hour = time.hour
     minute = time.minute
     if hour <14 or (hour == 15 and minute < 30):

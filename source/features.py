@@ -15,10 +15,10 @@ def calculate_eps_surprise(eps_actual, eps_opinion):
     return (float(eps_actual) - float(eps_opinion))/ abs(float(eps_opinion))
 
 #func finds price we can start trading at after earnings released
-def entry_price_after_earnings(bars, tickers, ERT):
+def entry_price_after_earnings(bars, ticker, ERT):
     delay = int(parameters["entry_delay"]) #gets the values from config.py
     entry_time = pd.Timestamp(ERT) + pd.Timedelta(minutes=delay) 
-    filtered_bars = bars[(bars["tickers"] == ticker) & (bars["timestamp_utc"]>=entry_time)] #all stocks that I can trade at any time now
+    filtered_bars = bars[(bars["ticker"] == ticker) & (bars["timestamp_utc"]>=entry_time)] #all stocks that I can trade at any time now
 
     if filtered_bars.empty:
         return None, None 
@@ -35,9 +35,10 @@ def create_features(earnings, bars, universe):
         if ticker not in universe: #checks if ticker can be traded out of hours on IG
             continue 
         earnings_release_time = earnings_row["earnings_datetime_utc"]
+        ERT = earnings_row["earnings_datetime_utc"]
         last_regular_session_close = last_regular_close(bars, ticker, ERT)
         entry_time, entry_price = entry_price_after_earnings(bars, ticker, ERT)
-        surprise = calculate_eps_surprise[earnings_row["eps_actual"], earnings_row["eps_opinion"]]
+        surprise = calculate_eps_surprise(earnings_row["eps_actual"], earnings_row["eps_opinion"])
         
         after_hours_move = None 
         if last_regular_close is not None and entry_price is not None:
@@ -45,10 +46,10 @@ def create_features(earnings, bars, universe):
 
         rows.append({
             "TICKER": ticker,
-            "earnings_datetime_utc" : earnings_release_time
-            "actual earnings": earnings_row["eps_actual"]
-            "consensus earnings": earnings_row["eps_opinion"]
-            "eps surprise": surprise,
+            "earnings_datetime_utc" : earnings_release_time,
+            "eps_actual" : ["eps_actual"],
+            "eps_opinion": earnings_row["eps_opinion"],
+            "eps_surprise": surprise,
             "last_regular_close": last_regular_session_close,
             "entry_time_utc": entry_time,
             "entry_price": entry_price,
@@ -56,3 +57,5 @@ def create_features(earnings, bars, universe):
         })
 
     return pd.DataFrame(rows)
+
+
