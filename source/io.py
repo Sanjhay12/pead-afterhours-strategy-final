@@ -12,6 +12,18 @@ def load_universe(file_path):
     tickers = tickers[tickers != ""] #to remove any empty strings i.e. bugged tickers
     return set(tickers)
 
+def filter_universe(universe, bars, liquidity = 2000000):
+    filtered_universe = set()
+    for i in universe:
+        filtered_bars = bars[bars["ticker"] == i] #i is the ticker btw
+        if filtered_bars.empty:
+            continue
+        average = (filtered_bars["close"]*filtered_bars["volume"]).mean()
+        if average > liquidity: 
+            filtered_universe.add(i)
+    return filtered_universe
+
+     
 
 def load_earnings(file_path):
 

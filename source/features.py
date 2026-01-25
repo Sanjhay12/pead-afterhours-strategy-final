@@ -1,6 +1,6 @@
 import pandas as pd
 from source.configuration import parameters
-from source.sessions import last_regular_close
+from source.sessions import last_regular_close, check_regular_session
 
 def calculate_eps_surprise(eps_actual, eps_opinion):
 
@@ -38,6 +38,9 @@ def create_features(earnings, bars, universe):
         ERT = earnings_row["earnings_datetime_utc"]
         last_regular_session_close = last_regular_close(bars, ticker, ERT)
         entry_time, entry_price = entry_price_after_earnings(bars, ticker, ERT)
+        volume_ratio = None 
+        if entry_time is not None:
+            volume_ratio = vol_ratio_after_earnings(bars, ticker, start = pd.Timestamp(earnings_release_time), end = pd.Timestamp(entry_time))
         surprise = calculate_eps_surprise(earnings_row["eps_actual"], earnings_row["eps_opinion"])
         
         after_hours_move = None 
@@ -54,8 +57,36 @@ def create_features(earnings, bars, universe):
             "entry_time_utc": entry_time,
             "entry_price": entry_price,
             "after_hours_move": after_hours_move,
+            "volume_ratio": volume_ratio,
         })
 
     return pd.DataFrame(rows)
+
+def vol_ratio_after_earnings(bars, ticker, start, end):
+
+    after_hours = bars[bars["ticker"] == ticker&(bars["timestamp_utc"] >= start) & (bars["timestamp_utc"]<=end)]
+    if after_hours.empty:
+        return None 
+    
+    after_hour_volume = after_hours["volume"].sum()
+    past_days = int(parameters.get("past_days"))
+
+    period = pd.Timestamp(start) - pd.Timedelta(days = past_days) #last x number of days i.e. past
+
+    bars_period = bars[(bars["ticker"]== ticker)& (bars["timestamp_utc"] >= period) & (bars["timestamp_utc"]<start)] #only historical bars now until starting point 
+    bars_period = bars_period[bars_period["timestamp_utc"].apply(check_regular_session)] #checks for trading hours only
+
+    if bars_period.empty:
+        return None 
+    
+    median_volume_bar = bars_period["volume"].median() #typical volume per bar
+    total_volume = median_volume_bar * len(after_hours)
+    if total_volume == 0 or pd.isna(total_volume):
+        return None 
+    
+    return float(after_hour_volume/total_volume) #now we can compare to thresholds
+
+
+
 
 

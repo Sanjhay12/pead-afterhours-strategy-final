@@ -13,6 +13,8 @@ def create_signals(features):
         if ticker is None:
             ticker = row.get("TICKER")
 
+        volume_ratio = row.get("volume_ratio")
+
         eps_surprise = row.get("eps_surprise")
         if eps_surprise is None:
             eps_surprise = row.get("eps surprise")
@@ -40,6 +42,13 @@ def create_signals(features):
             dir = "long"
         else:
             dir = "short"
+
+        volume_threshold = float(parameters("volume_ratio_threshold"))
+        
+        if pd.isna(volume_ratio):
+            continue 
+        if float(volume_ratio) < volume_threshold:
+            continue 
 
         rows.append({
             "ticker" : ticker,

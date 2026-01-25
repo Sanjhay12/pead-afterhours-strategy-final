@@ -1,7 +1,7 @@
 from pathlib import Path
 from source.features import create_features
 from source.metrics import produce_results
-from source.io import load_universe, load_bars, load_earnings
+from source.io import load_universe, load_bars, load_earnings, filter_universe
 from source.backtest import backtest
 from source.signals import create_signals
 
@@ -11,8 +11,10 @@ dir = Path("data")
 
 def main():
     universe = load_universe(dir / "All Sessions Shares.xlsx")
-    earnings = load_earnings(dir / "earnings.csv")
     bars = load_bars(dir/ "bars.csv")
+    universe = filter_universe(universe, bars)
+    earnings = load_earnings(dir / "earnings.csv")
+    
 
     features = create_features(earnings, bars, universe)
     print(features)
