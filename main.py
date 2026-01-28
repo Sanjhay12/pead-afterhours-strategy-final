@@ -11,7 +11,9 @@ dir = Path("data")
 
 def main():
     universe = load_universe(dir / "All Sessions Shares.xlsx")
-    bars = load_bars(dir/ "bars.csv")
+    bars = sorted(dir.glob("bars*.csv")) #ensures in order for time-series + only .csv files
+    bars = load_bars(bars)
+    print(bars.head())
     universe = filter_universe(universe, bars)
     earnings = load_earnings(dir / "earnings.csv")
     

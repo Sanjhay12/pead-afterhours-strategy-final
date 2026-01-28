@@ -1,0 +1,14 @@
+
+# ignore large data files
+data/
+*.csv
+*.csv.zst
+*.zst
+
+
+# local data
+data/
+*.csv
+*.csv.zst
+*.zst
+

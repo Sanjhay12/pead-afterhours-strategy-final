@@ -43,23 +43,37 @@ def load_earnings(file_path):
     
     return dataframe
 
-def load_bars(file_path):
 
-    file_path = Path(file_path)
-    dataframe = pd.read_csv(file_path)
 
-    required_columns = {"ticker", "timestamp_utc", "close"}
-    missing_columns = required_columns - set(dataframe.columns)
-    if missing_columns:
-        raise ValueError(print("the bars with missing columns {}").format(missing_columns))
+def load_bars(file_paths):
     
-    dataframe["ticker"] = dataframe["ticker"].astype(str).str.strip().str.upper()
-    dataframe["timestamp_utc"] = pd.to_datetime(dataframe["timestamp_utc"], utc = True)
-    dataframe["close"] = pd.to_numeric(dataframe["close"], errors = "coerce") 
+    if isinstance(file_paths, (str, Path)):
+        file_paths = [file_paths]
 
-    if "volume" in dataframe.columns:
-        dataframe["volume"] = pd.to_numeric(dataframe["volume"], errors = "coerce")
-    else:
-        dataframe["volume"] = 0
-    
-    return dataframe
+    frames = []
+
+    for file_path in file_paths:
+        file_path = Path(file_path)
+        dataframe = pd.read_csv(file_path)
+        dataframe.columns = dataframe.columns.str.strip().str.lower()
+
+        required_columns = {"ticker", "timestamp_utc", "close"}
+        missing_columns = required_columns - set(dataframe.columns)
+        if missing_columns:
+            raise ValueError(f"Bars file {file_path.name} missing columns {missing_columns}")
+
+        dataframe["ticker"] = dataframe["ticker"].astype(str).str.strip().str.upper()
+        dataframe["timestamp_utc"] = pd.to_datetime(dataframe["timestamp_utc"], utc=True)
+        dataframe["close"] = pd.to_numeric(dataframe["close"], errors="coerce")
+
+        if "volume" in dataframe.columns:
+            dataframe["volume"] = pd.to_numeric(dataframe["volume"], errors="coerce")
+        else:
+            dataframe["volume"] = 0
+
+        frames.append(dataframe[["ticker", "timestamp_utc", "close", "volume"]])
+
+    bars = pd.concat(frames, ignore_index=True)
+    bars = bars.sort_values(["ticker", "timestamp_utc"]).reset_index(drop=True)
+
+    return bars

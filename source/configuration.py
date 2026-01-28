@@ -7,4 +7,6 @@ parameters = {"eps_surprise_threshold": 0.05,
               "stop_loss": 0.01,
               "take_profit": 0.02,
               "past_days": 40 #this is to check the last 40 days to see what normal volume of trades are
+                          
+              
               }
