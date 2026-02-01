@@ -18,7 +18,7 @@ def backtest(signals,bars):
 
         forced_exit_time = entry_time + pd.Timedelta(minutes=max_holding)
 
-        filtered_bar = bars[(bars["ticker"] == ticker)] & (bars["timestamp_utc"]>=entry_time) & (bars["timestamp_utc"] <= forced_exit_time )
+        filtered_bar = bars[(bars["ticker"] == ticker) & (bars["timestamp_utc"]>=entry_time) & (bars["timestamp_utc"] <= forced_exit_time )]
 
         if filtered_bar.empty:
             continue #skip the code below then

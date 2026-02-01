@@ -5,6 +5,7 @@ from source.io import load_universe, load_bars, load_earnings, filter_universe
 from source.backtest import backtest
 from source.signals import create_signals
 
+
 print(" main.py started running")
 
 dir = Path("data")
@@ -15,8 +16,8 @@ def main():
     bars = load_bars(bars)
     print(bars.head())
     universe = filter_universe(universe, bars)
-    earnings = load_earnings(dir / "earnings.csv")
-    
+    earnings = load_earnings(dir / "eps_backtest_2021_2025.csv")
+    print(earnings.head())
 
     features = create_features(earnings, bars, universe)
     print(features)

@@ -12,7 +12,7 @@ def drawdowns(equity: pd.Series):
     peak = equity.cummax()
     drawdown = (equity-peak)/peak 
     
-    max_drawdon = drawdown.min()
+    max_drawdown = drawdown.min()
     max_dur = 0
     current_dur = 0
     for i in drawdown:
@@ -22,7 +22,7 @@ def drawdowns(equity: pd.Series):
                 max_dur = current_dur
         else:
             current_dur = 0
-    return drawdown, max_drawdon, max_dur
+    return drawdown, max_drawdown, max_dur
 
 
 
@@ -54,9 +54,9 @@ def calculate_trades(returns: pd.Series):
         payoff_ratio = average_win/ abs(average_loss)
     else:
         payoff_ratio = 0
-    expected = win_rate * average_win * (1-win_rate) * average_loss
+    expected = win_rate * average_win + (1-win_rate) * average_loss
 
-    return {"win_rate": win_rate, "average_win": average_win, "average_loss": average_loss, "payoff_ratio": payoff_ratio, "expectancy": expected}
+    return {"win_rate": win_rate, "average_win": average_win, "average_loss": average_loss, "payoff_ratio": payoff_ratio, "expected": expected}
 
 
 
@@ -75,20 +75,23 @@ def produce_results(trades):
      
     returns = trades["return"]
     equity = equity_curve(returns)
-    drawdowns, max_drawdown, max_drawdown_duration = drawdowns(equity)
+    drawdowns_series, max_drawdown, max_drawdown_duration = drawdowns(equity)
     sharpe = sharpe_ratio(returns)
-    win_rate, average_win, average_loss, expeced = calculate_trades(returns)
-
-
+    stats = calculate_trades(returns)
+    win_rate = stats["win_rate"]
+    expected = stats["expected"]
+    
     
 
     return{
+        "number_of_trades": len(returns),
         "max_drawdown":max_drawdown,
         "max_drawdown_duration": max_drawdown_duration, 
         "sharpe_ratio": sharpe,
         "win_rate": win_rate,
-        "average_win": average_win,
-        "average_loss": average_loss,
-        "expected": expeced,
+        "average_win": stats["average_win"],
+        "average_loss": stats["average_loss"],
+        "payoff_ratio": stats["payoff_ratio"],
+        "expected": expected,
         "final_equity": equity.iloc[-1],
     }
