@@ -5,8 +5,8 @@ def check_regular_session(time: pd.Timestamp):
     time = pd.Timestamp(time)
     hour = time.hour
     minute = time.minute
-    if hour <14 or (hour == 15 and minute < 30):
-        return False #not regular is before 14:30 and after 21:00
+    if hour <14 or (hour == 14 and minute < 30):
+        return False #not regular is before 15:30 and after 21:00
     
     if hour >= 21:
         return False

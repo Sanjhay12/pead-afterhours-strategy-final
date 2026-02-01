@@ -38,12 +38,12 @@ def create_signals(features):
             continue
 
             #long short decisions
-        if float(ah_move) > 0:
+        if float(eps_surprise) > 0:
             dir = "long"
         else:
             dir = "short"
 
-        volume_threshold = float(parameters("volume_ratio_threshold"))
+        volume_threshold = float(parameters["volume_ratio_threshold"])
         
         if pd.isna(volume_ratio):
             continue 

@@ -16,9 +16,9 @@ def backtest(signals,bars):
         entry_time = pd.to_datetime(row["entry_time_utc"], utc = True)
         entry_price = float(row["entry_price"])
 
-        forced_exit_time = entry_time + pd.Timedelta(mintus=max_holding)
+        forced_exit_time = entry_time + pd.Timedelta(minutes=max_holding)
 
-        filtered_bar = bars[bars["ticker"] == ticker] & (bars["timestamp_utc"]>=entry_time) & (bars["timestamp_utc"] <= forced_exit_time )
+        filtered_bar = bars[(bars["ticker"] == ticker)] & (bars["timestamp_utc"]>=entry_time) & (bars["timestamp_utc"] <= forced_exit_time )
 
         if filtered_bar.empty:
             continue #skip the code below then

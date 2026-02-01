@@ -31,7 +31,7 @@ def create_features(earnings, bars, universe):
     bars = bars.sort_values(["ticker", "timestamp_utc"]).reset_index(drop=True) #ensures chronological order in terms of prices and index starts from 0 onwards
     rows = []
     for row_index,earnings_row in earnings.iterrows():
-        ticker = str(earnings_row["ticker"]).strip()
+        ticker = str(earnings_row["ticker"]).strip().upper()
         if ticker not in universe: #checks if ticker can be traded out of hours on IG
             continue 
         earnings_release_time = earnings_row["earnings_datetime_utc"]
@@ -44,13 +44,13 @@ def create_features(earnings, bars, universe):
         surprise = calculate_eps_surprise(earnings_row["eps_actual"], earnings_row["eps_opinion"])
         
         after_hours_move = None 
-        if last_regular_close is not None and entry_price is not None:
+        if last_regular_session_close is not None and entry_price is not None:
             after_hours_move = (entry_price / last_regular_session_close) -1
 
         rows.append({
             "TICKER": ticker,
             "earnings_datetime_utc" : earnings_release_time,
-            "eps_actual" : ["eps_actual"],
+            "eps_actual" : earnings_row["eps_actual"],
             "eps_opinion": earnings_row["eps_opinion"],
             "eps_surprise": surprise,
             "last_regular_close": last_regular_session_close,
@@ -64,12 +64,13 @@ def create_features(earnings, bars, universe):
 
 def vol_ratio_after_earnings(bars, ticker, start, end):
 
-    after_hours = bars[bars["ticker"] == ticker&(bars["timestamp_utc"] >= start) & (bars["timestamp_utc"]<=end)]
+    after_hours = bars[
+        (bars["ticker"] == ticker)&(bars["timestamp_utc"] >= start) & (bars["timestamp_utc"]<=end)]
     if after_hours.empty:
         return None 
     
     after_hour_volume = after_hours["volume"].sum()
-    past_days = int(parameters.get("past_days"))
+    past_days = int(parameters.get("past_days",30))
 
     period = pd.Timestamp(start) - pd.Timedelta(days = past_days) #last x number of days i.e. past
 

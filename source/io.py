@@ -5,7 +5,7 @@ def load_universe(file_path):
     file_path = Path(file_path)
     dataframe = pd.read_excel(file_path, sheet_name = 0)
     if "Ticker" not in dataframe.columns:
-        raise ValueError(print("Ticker column does not exist, columns are{}").format(dataframe.columns))
+        raise ValueError(print("Ticker column does not exist, columns are{}").format(list(dataframe.columns)))
     
     tickers = (dataframe["Ticker"].dropna().astype(str).str.strip().str.upper())
 
